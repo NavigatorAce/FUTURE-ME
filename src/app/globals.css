@@ -1,0 +1,57 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 240 10% 6%;
+    --foreground: 240 5% 96%;
+    --card: 240 8% 10%;
+    --card-foreground: 240 5% 96%;
+    --primary: 160 45% 42%;
+    --primary-foreground: 0 0% 100%;
+    --muted: 240 6% 16%;
+    --muted-foreground: 240 4% 56%;
+    --accent: 240 6% 14%;
+    --accent-foreground: 240 5% 96%;
+    --border: 240 5% 18%;
+    --input: 240 5% 18%;
+    --ring: 160 45% 42%;
+    --radius: 0.75rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    @apply antialiased;
+  }
+  body {
+    @apply bg-background text-foreground min-h-screen;
+  }
+}
+
+/* Soft gradient mesh background utility */
+.bg-mesh {
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -20%, hsl(160 45% 42% / 0.12), transparent),
+    radial-gradient(ellipse 60% 40% at 80% 50%, hsl(260 40% 25% / 0.08), transparent),
+    radial-gradient(ellipse 50% 30% at 20% 80%, hsl(40 30% 25% / 0.06), transparent);
+}
+
+/* Blurred glow for cards */
+.card-glow {
+  box-shadow: 0 0 40px -12px hsl(160 45% 42% / 0.15);
+}
+
+/* Prose-style reading width */
+.prose-width {
+  max-width: 65ch;
+}
+
+/* Section spacing */
+.section-padding {
+  @apply px-6 py-16 md:px-12 md:py-24 lg:px-20 lg:py-28;
+}

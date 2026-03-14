@@ -84,15 +84,12 @@ The product does **not** predict the future. It supports **self-reflection**, **
 
 ## Tech Stack
 
-*Placeholder—update when stack is defined.*
-
 | Layer | Technology |
 |-------|------------|
-| **Frontend** | TBD (e.g. React / Next.js) |
-| **Backend** | TBD (e.g. Node.js / Python) |
-| **AI / LLM** | TBD (e.g. OpenAI API / Anthropic) |
-| **Database** | TBD (e.g. PostgreSQL / Supabase) |
-| **Deployment** | TBD (e.g. Vercel / Railway) |
+| **Frontend** | Next.js 14, React 18, TypeScript, Tailwind CSS, shadcn/ui-style components |
+| **Auth & DB** | Supabase (auth + PostgreSQL); optional for MVP (in-memory mock) |
+| **AI / LLM** | OpenAI API (gpt-4o-mini); optional for MVP (mock responses) |
+| **Deployment** | Vercel-ready (Next.js App Router) |
 
 ---
 
@@ -129,12 +126,11 @@ The first version includes:
 
 ## Getting Started
 
-*Placeholder—replace with real setup once the repo has runnable code.*
-
 ### Prerequisites
 
-- Node.js 18+ (or Python 3.10+ if backend is Python)
-- An API key for the chosen LLM provider (e.g. OpenAI, Anthropic)
+- Node.js 18+
+- (Optional) Supabase project for auth and database
+- (Optional) OpenAI API key for real branch/answer generation
 
 ### Setup
 
@@ -143,24 +139,33 @@ The first version includes:
 git clone https://github.com/your-org/branch-self.git
 cd branch-self
 
-# Install dependencies (example; adjust for your stack)
-npm install
-# or: pip install -r requirements.txt
+# Install dependencies
+npm install --legacy-peer-deps
 
-# Set environment variables
-cp .env.example .env
-# Edit .env and add your LLM API key (e.g. OPENAI_API_KEY=...)
+# Copy env example and add keys if you have them
+cp .env.example .env.local
 
-# Run locally
+# Run locally (works without keys using in-memory mock + mock AI)
 npm run dev
-# or: python app.py
 ```
+
+Open [http://localhost:3000](http://localhost:3000). You can complete the full flow with mock data; no keys required for a first run.
 
 ### Environment Variables
 
 | Variable | Description |
 |----------|-------------|
-| `OPENAI_API_KEY` (or equivalent) | API key for the LLM used for persona generation and Q&A. |
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL (optional; without it, app uses in-memory store). |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key (optional). |
+| `OPENAI_API_KEY` | OpenAI API key for real branch and answer generation (optional; mock responses used if missing). |
+
+### Database (Supabase)
+
+Run the SQL in `supabase/migrations/001_initial_schema.sql` in your Supabase project’s SQL Editor to create tables and RLS policies.
+
+### Project structure
+
+See **[STRUCTURE.md](./STRUCTURE.md)** for folder layout, what is mocked vs wired, and TODO markers for API keys and Supabase setup.
 
 ---
 
