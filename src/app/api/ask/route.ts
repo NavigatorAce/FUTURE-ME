@@ -5,6 +5,7 @@ import { getBranchesByProfileId } from "@/services/branches";
 import { createSession, saveAnswers } from "@/services/dialogue";
 import { generateAnswerForBranch } from "@/services/ai";
 import { mockStore } from "@/lib/mock-store";
+import { askPostSchema } from "@/lib/validations/schemas";
 
 const USE_SUPABASE = !!(
   process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -12,10 +13,23 @@ const USE_SUPABASE = !!(
 
 export async function POST(request: Request) {
   try {
-    const { question } = await request.json();
-    if (!question || typeof question !== "string") {
-      return NextResponse.json({ error: "Question is required" }, { status: 400 });
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
     }
+
+    const parsed = askPostSchema.safeParse(body);
+    if (!parsed.success) {
+      const first = parsed.error.flatten().formErrors[0] ?? parsed.error.message;
+      return NextResponse.json(
+        { error: typeof first === "string" ? first : "Question is required" },
+        { status: 400 }
+      );
+    }
+
+    const { question } = parsed.data;
 
     if (USE_SUPABASE) {
       const supabase = await createClient();

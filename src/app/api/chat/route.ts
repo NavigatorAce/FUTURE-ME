@@ -4,6 +4,7 @@ import { getProfileByUserId } from "@/services/profile";
 import { mockStore } from "@/lib/mock-store";
 import { genAI, GEMINI_MODEL } from "@/lib/gemini/client";
 import { getFutureMeSystemPrompt } from "@/lib/gemini/prompts";
+import { chatPostSchema } from "@/lib/validations/schemas";
 import type { CurrentSelfProfile } from "@/types";
 
 const USE_SUPABASE = !!(
@@ -12,26 +13,29 @@ const USE_SUPABASE = !!(
 
 const USE_MOCK = !process.env.GEMINI_API_KEY;
 
-interface ChatMessage {
-  role: "user" | "assistant";
-  content: string;
-}
-
 function getMockReply(question: string): string {
   return `Hey, I hear you. That's something I remember wrestling with too. Looking back from where I am now, I'd say: don't overthink it. The fact that you're asking "${question.slice(0, 60)}${question.length > 60 ? "..." : ""}" tells me you already sense the direction you need to go.\n\nWhat I can tell you is — the worrying? It doesn't go away entirely, but it changes shape. The things I was afraid of back then, most of them either never happened or turned out to be manageable. What mattered more was showing up, even imperfectly.\n\nTrust yourself a little more than you think you should. You've got this.`;
 }
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    const { messages, yearsAhead = 10 } = body as {
-      messages: ChatMessage[];
-      yearsAhead?: number;
-    };
-
-    if (!messages || !Array.isArray(messages) || messages.length === 0) {
-      return NextResponse.json({ error: "Messages are required" }, { status: 400 });
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
     }
+
+    const parsed = chatPostSchema.safeParse(body);
+    if (!parsed.success) {
+      const first = parsed.error.flatten().formErrors[0] ?? parsed.error.message;
+      return NextResponse.json(
+        { error: typeof first === "string" ? first : "Validation failed" },
+        { status: 400 }
+      );
+    }
+
+    const { messages, yearsAhead } = parsed.data;
 
     // Get user profile
     let profile: CurrentSelfProfile | null = null;

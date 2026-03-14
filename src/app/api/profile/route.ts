@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getProfileByUserId, upsertProfile } from "@/services/profile";
 import { mockStore } from "@/lib/mock-store";
+import { profilePostSchema } from "@/lib/validations/schemas";
 import type { CurrentSelfProfile } from "@/types";
 
 const USE_SUPABASE = !!(
@@ -29,7 +30,22 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+    }
+
+    const parsed = profilePostSchema.safeParse(body);
+    if (!parsed.success) {
+      const first = parsed.error.flatten().formErrors[0] ?? parsed.error.message;
+      return NextResponse.json(
+        { error: typeof first === "string" ? first : "Validation failed" },
+        { status: 400 }
+      );
+    }
+
     const {
       age,
       lifeStage,
@@ -38,17 +54,17 @@ export async function POST(request: Request) {
       fears,
       currentStruggles,
       additionalContext,
-    } = body;
+    } = parsed.data;
 
     const profile: CurrentSelfProfile = {
       userId: "", // set below
-      age: age ?? 30,
-      lifeStage: lifeStage ?? "exploring",
-      personalityTraits: Array.isArray(personalityTraits) ? personalityTraits : [],
-      goals: goals ?? "",
-      fears: fears ?? "",
-      currentStruggles: currentStruggles ?? "",
-      additionalContext: additionalContext ?? undefined,
+      age,
+      lifeStage,
+      personalityTraits,
+      goals,
+      fears,
+      currentStruggles,
+      additionalContext,
     };
 
     if (USE_SUPABASE) {
