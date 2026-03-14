@@ -47,6 +47,12 @@ export async function POST(request: Request) {
     }
 
     const {
+      profileName,
+      name,
+      status,
+      university,
+      major,
+      job,
       age,
       lifeStage,
       personalityTraits,
@@ -58,6 +64,12 @@ export async function POST(request: Request) {
 
     const profile: CurrentSelfProfile = {
       userId: "", // set below
+      profileName: profileName || undefined,
+      name: name || undefined,
+      status: status ?? undefined,
+      university: university || undefined,
+      major: major || undefined,
+      job: job || undefined,
       age,
       lifeStage,
       personalityTraits,

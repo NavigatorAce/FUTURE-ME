@@ -13,9 +13,17 @@ export type LifeStage =
   | "exploring"
   | "other";
 
+export type StudyOrWorkStatus = "studying" | "working";
+
 export interface CurrentSelfProfile {
   id?: string;
   userId: string;
+  profileName?: string;
+  name?: string;
+  status?: StudyOrWorkStatus;
+  university?: string;
+  major?: string;
+  job?: string;
   age: number;
   lifeStage: LifeStage;
   personalityTraits: string[];

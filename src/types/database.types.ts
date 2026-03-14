@@ -7,10 +7,16 @@ export type Json = string | number | boolean | null | Json[] | { [key: string]: 
 export interface Database {
   public: {
     Tables: {
-      profiles: {
+      current_self_profiles: {
         Row: {
           id: string;
           user_id: string;
+          profile_name: string;
+          name: string;
+          status: string | null;
+          university: string;
+          major: string;
+          job: string;
           age: number;
           life_stage: string;
           personality_traits: string[];
@@ -21,11 +27,11 @@ export interface Database {
           created_at: string;
           updated_at: string;
         };
-        Insert: Omit<Database["public"]["Tables"]["profiles"]["Row"], "id" | "created_at" | "updated_at"> & {
+        Insert: Omit<Database["public"]["Tables"]["current_self_profiles"]["Row"], "id" | "created_at" | "updated_at"> & {
           created_at?: string;
           updated_at?: string;
         };
-        Update: Partial<Database["public"]["Tables"]["profiles"]["Insert"]>;
+        Update: Partial<Database["public"]["Tables"]["current_self_profiles"]["Insert"]>;
       };
       future_branches: {
         Row: {

@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import type { LifeStage } from "@/types";
+import type { LifeStage, StudyOrWorkStatus } from "@/types";
 
 const LIFE_STAGES: { value: LifeStage; label: string }[] = [
   { value: "early_career", label: "Early career" },
@@ -18,6 +18,11 @@ const LIFE_STAGES: { value: LifeStage; label: string }[] = [
   { value: "other", label: "Other" },
 ];
 
+const STATUS_OPTIONS: { value: StudyOrWorkStatus; label: string }[] = [
+  { value: "studying", label: "Studying" },
+  { value: "working", label: "Working" },
+];
+
 const TRAIT_OPTIONS = [
   "Curious", "Cautious", "Ambitious", "Reflective", "Creative", "Practical",
   "Empathetic", "Independent", "Driven", "Calm", "Anxious", "Optimistic",
@@ -25,6 +30,12 @@ const TRAIT_OPTIONS = [
 
 export default function ProfilePage() {
   const router = useRouter();
+  const [profileName, setProfileName] = useState("");
+  const [name, setName] = useState("");
+  const [status, setStatus] = useState<StudyOrWorkStatus | "">("");
+  const [university, setUniversity] = useState("");
+  const [major, setMajor] = useState("");
+  const [job, setJob] = useState("");
   const [age, setAge] = useState("");
   const [lifeStage, setLifeStage] = useState<LifeStage>("exploring");
   const [traits, setTraits] = useState<string[]>([]);
@@ -33,6 +44,7 @@ export default function ProfilePage() {
   const [struggles, setStruggles] = useState("");
   const [additional, setAdditional] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [initialLoad, setInitialLoad] = useState(true);
 
   useEffect(() => {
@@ -47,6 +59,12 @@ export default function ProfilePage() {
           setInitialLoad(false);
           return;
         }
+        setProfileName(p.profileName ?? "");
+        setName(p.name ?? "");
+        setStatus((p.status as StudyOrWorkStatus) ?? "");
+        setUniversity(p.university ?? "");
+        setMajor(p.major ?? "");
+        setJob(p.job ?? "");
         setAge(p.age != null ? String(p.age) : "");
         setLifeStage((p.lifeStage as LifeStage) || "exploring");
         setTraits(Array.isArray(p.personalityTraits) ? p.personalityTraits : []);
@@ -72,11 +90,18 @@ export default function ProfilePage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
+    setError(null);
     try {
       const res = await fetch("/api/profile", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          profileName: profileName || undefined,
+          name: name || undefined,
+          status: status || undefined,
+          university: university || undefined,
+          major: major || undefined,
+          job: job || undefined,
           age: parseInt(age, 10) || 30,
           lifeStage,
           personalityTraits: traits,
@@ -86,9 +111,11 @@ export default function ProfilePage() {
           additionalContext: additional || undefined,
         }),
       });
-      if (!res.ok) throw new Error("Failed to save profile");
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error((data?.error as string) || "Failed to save profile");
       router.push("/ask");
-    } catch {
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to save profile");
       setLoading(false);
     }
   }
@@ -116,6 +143,97 @@ export default function ProfilePage() {
         <form onSubmit={handleSubmit} className="space-y-8">
           <Card className="rounded-3xl border-border/50 bg-card/80">
             <CardHeader>
+              <CardTitle className="text-lg">Identity</CardTitle>
+              <CardDescription>Profile name and how we should refer to you.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="profileName">Profile name</Label>
+                  <Input
+                    id="profileName"
+                    type="text"
+                    placeholder="e.g. My 2030 self"
+                    value={profileName}
+                    onChange={(e) => setProfileName(e.target.value)}
+                    className="bg-muted/50 border-border"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="name">Name</Label>
+                  <Input
+                    id="name"
+                    type="text"
+                    placeholder="e.g. Alex"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="bg-muted/50 border-border"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Studying or working?</Label>
+                <div className="flex flex-wrap gap-2">
+                  {STATUS_OPTIONS.map((s) => (
+                    <button
+                      key={s.value}
+                      type="button"
+                      onClick={() => setStatus(s.value)}
+                      className={`rounded-xl px-4 py-2 text-sm font-medium transition-colors ${
+                        status === s.value
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted text-muted-foreground hover:bg-muted/80"
+                      }`}
+                    >
+                      {s.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              {status === "studying" && (
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="university">University</Label>
+                    <Input
+                      id="university"
+                      type="text"
+                      placeholder="e.g. Stanford University"
+                      value={university}
+                      onChange={(e) => setUniversity(e.target.value)}
+                      className="bg-muted/50 border-border"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="major">Major</Label>
+                    <Input
+                      id="major"
+                      type="text"
+                      placeholder="e.g. Computer Science"
+                      value={major}
+                      onChange={(e) => setMajor(e.target.value)}
+                      className="bg-muted/50 border-border"
+                    />
+                  </div>
+                </div>
+              )}
+              {status === "working" && (
+                <div className="space-y-2">
+                  <Label htmlFor="job">Job</Label>
+                  <Input
+                    id="job"
+                    type="text"
+                    placeholder="e.g. Product designer at a startup"
+                    value={job}
+                    onChange={(e) => setJob(e.target.value)}
+                    className="bg-muted/50 border-border"
+                  />
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="rounded-3xl border-border/50 bg-card/80">
+            <CardHeader>
               <CardTitle className="text-lg">Basics</CardTitle>
               <CardDescription>Age and life stage help shape plausible futures.</CardDescription>
             </CardHeader>
@@ -131,6 +249,7 @@ export default function ProfilePage() {
                     placeholder="e.g. 28"
                     value={age}
                     onChange={(e) => setAge(e.target.value)}
+                    className="bg-muted/50 border-border"
                   />
                 </div>
                 <div className="space-y-2">
@@ -230,6 +349,9 @@ export default function ProfilePage() {
             </CardContent>
           </Card>
 
+          {error && (
+            <p className="text-sm text-red-400">{error}</p>
+          )}
           <div className="flex justify-end">
             <Button type="submit" size="lg" disabled={loading}>
               {loading ? "Saving…" : "Save and continue"}

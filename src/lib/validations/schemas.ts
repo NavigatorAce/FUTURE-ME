@@ -26,6 +26,12 @@ const YEARS_AHEAD_MAX = 60;
 
 /** POST /api/profile — request body */
 export const profilePostSchema = z.object({
+  profileName: z.string().max(200).optional().default(""),
+  name: z.string().max(200).optional().default(""),
+  status: z.enum(["studying", "working"]).optional(),
+  university: z.string().max(300).optional().default(""),
+  major: z.string().max(200).optional().default(""),
+  job: z.string().max(300).optional().default(""),
   age: z.coerce.number().int().min(AGE_MIN).max(AGE_MAX).optional().default(30),
   lifeStage: z.enum(LIFE_STAGES).optional().default("exploring"),
   personalityTraits: z

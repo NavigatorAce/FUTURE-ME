@@ -1,11 +1,17 @@
 import type { CurrentSelfProfile } from "@/types";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-const TABLE = "profiles";
+const TABLE = "current_self_profiles";
 
 function toRow(p: CurrentSelfProfile) {
   return {
     user_id: p.userId,
+    profile_name: p.profileName ?? "",
+    name: p.name ?? "",
+    status: p.status ?? null,
+    university: p.university ?? "",
+    major: p.major ?? "",
+    job: p.job ?? "",
     age: p.age,
     life_stage: p.lifeStage,
     personality_traits: p.personalityTraits ?? [],
@@ -21,6 +27,12 @@ function fromRow(row: Record<string, unknown>): CurrentSelfProfile {
   return {
     id: row.id as string,
     userId: row.user_id as string,
+    profileName: (row.profile_name as string) ?? undefined,
+    name: (row.name as string) ?? undefined,
+    status: (row.status as CurrentSelfProfile["status"]) ?? undefined,
+    university: (row.university as string) ?? undefined,
+    major: (row.major as string) ?? undefined,
+    job: (row.job as string) ?? undefined,
     age: row.age as number,
     lifeStage: row.life_stage as CurrentSelfProfile["lifeStage"],
     personalityTraits: (row.personality_traits as string[]) ?? [],
@@ -41,6 +53,8 @@ export async function ensureProfileForUser(
   const defaults: CurrentSelfProfile = {
     id: "",
     userId,
+    profileName: "",
+    name: "",
     age: 30,
     lifeStage: "exploring",
     personalityTraits: [],
@@ -71,16 +85,16 @@ export async function upsertProfile(
   profile: CurrentSelfProfile
 ): Promise<CurrentSelfProfile> {
   const row = toRow(profile);
+  const payload = profile.id
+    ? { ...row, id: profile.id, updated_at: row.updated_at }
+    : { ...row, created_at: new Date().toISOString() };
+
   const { data, error } = await supabase
     .from(TABLE)
-    .upsert(
-      profile.id
-        ? { ...row, id: profile.id, updated_at: row.updated_at }
-        : { ...row, created_at: new Date().toISOString() },
-      { onConflict: "user_id" }
-    )
+    .upsert(payload, { onConflict: "user_id" })
     .select()
     .single();
+
   if (error) throw error;
   return fromRow(data);
 }
