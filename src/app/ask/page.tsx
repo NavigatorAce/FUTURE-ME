@@ -179,6 +179,11 @@ export default function AskPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  // When landing on chat (from Profile "Save and continue" or nav "Chat"), scroll to top so the 5/10/15 yrs row is visible
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   // Auto scroll to bottom when new messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -259,8 +264,8 @@ export default function AskPage() {
 
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)]">
-      {/* Header with time selector */}
-      <div className="border-b border-border/40 bg-background/80 backdrop-blur-sm">
+      {/* Header with time selector: directly under Profile/Chat/History nav, sticky so it stays visible */}
+      <div className="sticky top-16 z-40 border-b border-border/40 bg-background/80 backdrop-blur-sm shrink-0">
         <div className="mx-auto max-w-3xl px-4 py-4">
           <div className="flex items-center justify-between">
             <div>
