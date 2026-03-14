@@ -8,7 +8,7 @@ import { useAuth, getDisplayNameFromAuth } from "@/hooks/useAuth";
 const navItems = [
   { href: "/", label: "Home" },
   { href: "/profile", label: "Profile" },
-  { href: "/ask", label: "Ask" },
+  { href: "/ask", label: "Chat" },
   { href: "/history", label: "History" },
 ];
 

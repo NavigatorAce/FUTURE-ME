@@ -87,7 +87,7 @@ export default function ProfilePage() {
         }),
       });
       if (!res.ok) throw new Error("Failed to save profile");
-      router.push("/branches");
+      router.push("/ask");
     } catch {
       setLoading(false);
     }

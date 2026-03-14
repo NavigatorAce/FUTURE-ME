@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getProfileByUserId, upsertProfile } from "@/services/profile";
-import { generateBranches } from "@/services/ai";
-import { insertBranches, deleteBranchesByProfileId } from "@/services/branches";
 import { mockStore } from "@/lib/mock-store";
 import type { CurrentSelfProfile } from "@/types";
 
@@ -61,17 +59,12 @@ export async function POST(request: Request) {
       }
       profile.userId = user.id;
       const saved = await upsertProfile(supabase, profile);
-      await deleteBranchesByProfileId(supabase, saved.id!);
-      const generated = await generateBranches(saved);
-      await insertBranches(supabase, saved.id!, generated);
       return NextResponse.json({ profile: saved });
     }
 
     const userId = mockStore.getUserId();
     profile.userId = userId;
     const saved = mockStore.setProfile(profile);
-    const generated = await generateBranches(saved);
-    mockStore.setBranches(saved.id!, generated);
     return NextResponse.json({ profile: saved });
   } catch (e) {
     console.error(e);
