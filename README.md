@@ -106,8 +106,8 @@ The product does **not** predict the future. It supports **self-reflection**, **
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/future-me.git
-cd future-me
+git clone https://github.com/NavigatorAce/FUTURE-ME.git
+cd FUTURE-ME
 
 # Install dependencies
 npm install --legacy-peer-deps
